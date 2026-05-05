@@ -6,7 +6,6 @@ from prepare_and_train_model import prepare_and_train_models
 from recommender import (
     recommend_from_input,
     rank_recommendations,
-    slider_input_to_model_input,
     text_to_model_input,
 )
 
@@ -89,7 +88,7 @@ with tab_text:
         ranked_recs = rank_recommendations(recs)
 
         st.success(f"Predicted cluster: {cluster}")
-        st.dataframe(ranked_recs, use_container_width=True)
+        st.dataframe(ranked_recs, width="stretch")
 
 
 with tab_sliders:
@@ -140,7 +139,7 @@ with tab_sliders:
         ranked_recs = rank_recommendations(recs)
 
         st.success(f"Predicted cluster: {cluster}")
-        st.dataframe(ranked_recs, use_container_width=True)
+        st.dataframe(ranked_recs, width="stretch")
 
 
 with tab_similar:
