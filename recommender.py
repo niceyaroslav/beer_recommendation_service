@@ -9,6 +9,7 @@ def recommend_from_input(user_input, df_clean, df_scaled, feature_cols, scaler, 
         user_input = text_to_model_input(user_input, descriptors, feature_cols, df_clean)
     else:
         user_input = slider_input_to_model_input(user_input, df_clean)
+
     user_vector = build_user_vector(user_input, df_clean, feature_cols)
     user_scaled = scaler.transform(user_vector)
     user_scaled_df = pd.DataFrame(
@@ -29,14 +30,29 @@ def recommend_from_input(user_input, df_clean, df_scaled, feature_cols, scaler, 
         if len(results) >= n:
             break
 
+    metric = knn.metric
     recs = df_clean.iloc[[idx for idx, _ in results]].copy()
     recs["distance"] = [dist for _, dist in results]
-    recs["similarity"] = 1 - recs["distance"]
+    recs["similarity"] = recs["distance"].apply(
+        lambda d: distance_to_similarity(d, metric)
+    )
 
     return cluster, recs[
         ["beer name full", "style", "brewery", "abv",
          "review overall", "number of reviews", "distance", "similarity"]
     ]
+
+
+def distance_to_similarity(distance, metric):
+    if metric == "cosine":
+        # cosine distance is usually 0 to 2, often 0 to 1 in practice
+        return 1 - distance
+
+    if metric == "euclidean":
+        # euclidean distance has no fixed upper bound
+        return 1 / (1 + distance)
+
+    return 1 / (1 + distance)
 
 
 def recommend_similar_beer(beer_name, df_clean, X_scaled, knn, n=5):
@@ -58,16 +74,22 @@ def recommend_similar_beer(beer_name, df_clean, X_scaled, knn, n=5):
 def rank_recommendations(recs):
     recs = recs.copy()
 
-    # normalize rating
-    recs["rating norm"] = (
-        recs["review overall"] - recs["review overall"].min()
-    ) / (recs["review overall"].max() - recs["review overall"].min())
+    rating_min = recs["review overall"].min()
+    rating_max = recs["review overall"].max()
 
-    # invert distance (closer = better)
-    recs["similarity"] = 1 / (1 + recs["distance"])
+    if rating_max == rating_min:
+        recs["rating norm"] = 1.0
+    else:
+        recs["rating norm"] = (
+            recs["review overall"] - rating_min
+        ) / (rating_max - rating_min)
+
+    # normalize distance within returned results
+    recs["similarity norm"] = recs["distance"].rank(ascending=True, pct=True)
+    recs["similarity norm"] = 1 - recs["similarity norm"]
 
     # final score
-    recs["score"] = 0.7 * recs["similarity"] + 0.3 * recs["rating norm"]
+    recs["score"] = 0.7 * recs["similarity norm"] + 0.3 * recs["rating norm"]
 
     return recs.sort_values("score", ascending=False)
 

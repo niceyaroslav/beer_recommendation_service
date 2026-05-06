@@ -8,7 +8,11 @@ def build_user_vector(user_input, df_clean, feature_cols):
     defaults = df_clean[feature_cols].median().to_dict()
 
     # override with user input
-    defaults.update(user_input)
+    defaults = df_clean[feature_cols].median().to_dict()
+
+    for k, v in user_input.items():
+        # weighted override (stronger than median)
+        defaults[k] = 0.7 * v + 0.3 * defaults[k]
 
     # return ordered vector
     return pd.DataFrame([defaults])[feature_cols]
@@ -84,12 +88,37 @@ def text_to_features(text, descriptors):
     return dict(features)
 
 
-def text_to_model_input(text, descriptors, feature_cols, df_clean):
-    raw_features = text_to_features(text, descriptors)
+def adjust_features(features):
+    features = features.copy()
 
+    # Hoppy implies bitterness
+    if "hoppy" in features:
+        features["bitter"] = max(
+            features.get("bitter", 0),
+            features["hoppy"] * 0.6
+        )
+
+    # Fruity often implies slight sweetness
+    if "fruits" in features:
+        features["sweet"] = max(
+            features.get("sweet", 0),
+            features["fruits"] * 0.3
+        )
+
+    # Light → low body
+    if "body" in features and features["body"] < 0:
+        features["body"] = 0
+    return features
+
+
+def text_to_model_input(text, descriptors, feature_cols, df_clean):
+    print(f'user input as text is {text}')
+    raw_features = text_to_features(text, descriptors)
+    adjusted_features = adjust_features(raw_features)
+    print(f'adjusted features are {adjusted_features}')
     user_input = {}
 
-    for feature, value in raw_features.items():
+    for feature, value in adjusted_features.items():
         if feature in feature_cols:
             value = max(value, 0)
 

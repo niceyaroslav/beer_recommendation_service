@@ -50,7 +50,7 @@ with tab_text:
 
     user_text = st.text_input(
         "Example: very fruity, hoppy, light, not too sour",
-        value="very fruity, hoppy"
+        value="very hoppy, fruity"
     )
 
     n_recommendations = st.slider(
@@ -71,7 +71,6 @@ with tab_text:
         st.write("Extracted preferences:")
         st.json(extracted_user_input)
 
-        print(df_clean.describe())
         print(user_text)
         cluster, recs = recommend_from_input(
             user_text,

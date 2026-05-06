@@ -6,7 +6,7 @@ from data_preprocessor import DataPreprocessor
 dp = DataPreprocessor()
 
 
-def prepare_and_train_models():
+def prepare_and_train_models(metric='euclidean'):
 
     scaler = StandardScaler()
     df_clean = dp.df
@@ -17,6 +17,6 @@ def prepare_and_train_models():
     kmeans = KMeans(n_clusters=8, random_state=42, n_init=10)
     df_clean["cluster"] = kmeans.fit_predict(df_scaled)
 
-    knn = NearestNeighbors(n_neighbors=10, metric="cosine")
+    knn = NearestNeighbors(n_neighbors=10, metric=metric)
     knn.fit(df_scaled)
     return kmeans, knn, scaler, df_clean
