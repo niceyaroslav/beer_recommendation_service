@@ -6,7 +6,7 @@ from prepare_and_train_model import prepare_and_train_models
 from recommender import (
     recommend_from_input,
     rank_recommendations,
-    text_to_model_input,
+    text_to_model_input, recommend_similar_beer,
 )
 
 from data_preprocessor import DataPreprocessor
@@ -84,7 +84,7 @@ with tab_text:
             descriptors=descriptors
         )
 
-        ranked_recs = rank_recommendations(recs)
+        ranked_recs = rank_recommendations(recs, df_clean)
 
         st.success(f"Predicted cluster: {cluster}")
         st.dataframe(ranked_recs, width="stretch")
@@ -135,7 +135,7 @@ with tab_sliders:
             n=5
         )
 
-        ranked_recs = rank_recommendations(recs)
+        ranked_recs = rank_recommendations(recs, df_clean)
 
         st.success(f"Predicted cluster: {cluster}")
         st.dataframe(ranked_recs, width="stretch")
@@ -151,4 +151,9 @@ with tab_similar:
 
     if st.button("Find similar beers"):
         # Use your existing recommend_similar_beer function here
-        st.info("Connect this to recommend_similar_beer().")
+
+        recs = recommend_similar_beer(beer_name, df_clean, df_scaled, knn, n=5)
+
+        ranked_recs = rank_recommendations(recs, df_clean)
+
+        st.dataframe(ranked_recs, width="stretch")

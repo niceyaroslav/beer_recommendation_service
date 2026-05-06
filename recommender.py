@@ -60,7 +60,12 @@ def recommend_similar_beer(beer_name, df_clean, X_scaled, knn, n=5):
     idx = df_clean[df_clean["beer name full"] == beer_name].index[0]
     row_pos = df_clean.index.get_loc(idx)
 
-    distances, indices = knn.kneighbors([X_scaled[row_pos]], n_neighbors=n+1)
+    query_vector = X_scaled.iloc[[row_pos]]
+
+    distances, indices = knn.kneighbors(
+        query_vector,
+        n_neighbors=n + 1
+    )
 
     recs = df_clean.iloc[indices[0][1:]].copy()
     recs["distance"] = distances[0][1:]
@@ -71,18 +76,16 @@ def recommend_similar_beer(beer_name, df_clean, X_scaled, knn, n=5):
     ]
 
 
-def rank_recommendations(recs):
+def rank_recommendations(recs, df_clean):
     recs = recs.copy()
 
-    rating_min = recs["review overall"].min()
-    rating_max = recs["review overall"].max()
+    global_min = df_clean["review overall"].min()
+    global_max = df_clean["review overall"].max()
 
-    if rating_max == rating_min:
-        recs["rating norm"] = 1.0
-    else:
-        recs["rating norm"] = (
-            recs["review overall"] - rating_min
-        ) / (rating_max - rating_min)
+    recs["rating norm"] = (
+        recs["review overall"] - global_min
+    ) / (global_max - global_min)
+
 
     # normalize distance within returned results
     recs["similarity norm"] = recs["distance"].rank(ascending=True, pct=True)
@@ -123,7 +126,7 @@ if __name__ == '__main__':
         knn
     )
 
-    ranked_recs = rank_recommendations(recs)
+    ranked_recs = rank_recommendations(recs, df_clean)
 
     user_input_text = "fruity, hoppy, citra"
 
@@ -138,4 +141,4 @@ if __name__ == '__main__':
         descriptors=descriptors
     )
 
-    ranked_recs_from_text = rank_recommendations(recs_from_text)
+    ranked_recs_from_text = rank_recommendations(recs_from_text, df_clean)
