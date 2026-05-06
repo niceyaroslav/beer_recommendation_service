@@ -386,3 +386,15 @@ def dominant_style_by_cluster(
     _save_or_show(fig, save_path, show, dpi)
 
     return fig, ax, dominant_style_per_cluster
+
+
+if __name__ == '__main__':
+    ibu_and_abv_distribution(show=False)
+    taste_profile_distribution(show=False)
+    flavor_profile_comparison(show=False)
+    correlation_matrix_of_taste_descriptors(show=False)
+    rating_distribution_vs_number_of_reviews(show=False)
+    selection_of_clustering_basis_by_silhouette_score(show=False)
+    pca_component_amount_vs_explained_variance(show=False)
+    pca_plot_colored_by_clusters(show=False)
+    dominant_style_by_cluster(show=False)
