@@ -57,9 +57,9 @@ class DataPreprocessor:
         return pd.DataFrame(descriptors)
 
     def import_and_process_descriptors(self):
-        mouthfeel = pd.read_excel(self.descriptors_path, sheet_name='Mouthfeel')
-        taste = pd.read_excel(self.descriptors_path, sheet_name='Taste')
-        flavor = pd.read_excel(self.descriptors_path, sheet_name='Flavor And Aroma')
+        mouthfeel = pd.read_excel(self.descriptors_path, sheet_name='Mouthfeel', engine='openpyxl')
+        taste = pd.read_excel(self.descriptors_path, sheet_name='Taste', engine='openpyxl')
+        flavor = pd.read_excel(self.descriptors_path, sheet_name='Flavor And Aroma', engine='openpyxl')
 
         df_mouthfeel = self.reshape_descriptor_sheet(mouthfeel)
         df_taste = self.reshape_descriptor_sheet(taste)
