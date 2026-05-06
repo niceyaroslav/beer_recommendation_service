@@ -2,8 +2,6 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-from download_data_if_missing import download_kaggle_dataset_if_missing
-
 
 class DataPreprocessor:
 
@@ -20,7 +18,6 @@ class DataPreprocessor:
     ]
 
     def __init__(self):
-        download_kaggle_dataset_if_missing()
         self.main_dataset_path = 'data/beer_profile_and_ratings.csv'
         self.descriptors_path = 'data/Beer Descriptors Simplified.xlsx'
         self.df = self.import_main_dataset()
