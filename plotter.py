@@ -73,12 +73,12 @@ def ibu_and_abv_distribution(
 
     fig, ax = plt.subplots(1, 2, figsize=figsize)
 
-    sns.histplot(df_clean["abv"], bins=30, ax=ax[0])
+    sns.histplot(df_clean["abv"], bins=30, ax=ax[0], color="steelblue")
     ax[0].set_title("Distribution of ABV")
     ax[0].set_xlabel("ABV")
     ax[0].set_ylabel("Count")
 
-    sns.histplot(df_clean["max ibu"], bins=30, ax=ax[1])
+    sns.histplot(df_clean["max ibu"], bins=30, ax=ax[1], color="darkorange")
     ax[1].set_title("Distribution of Max IBU")
     ax[1].set_xlabel("Max IBU")
     ax[1].set_ylabel("Count")
@@ -90,55 +90,41 @@ def ibu_and_abv_distribution(
     return fig, ax
 
 
-def taste_profile_distribution(
-    save_path='plots/taste_profile_distribution.png',
+def taste_and_flavor_profile_comparison(
+    save_path="plots/taste_and_flavor_profile_comparison.png",
     show=False,
-    figsize=(8, 5),
+    figsize=(12, 5),
     dpi=300
 ):
-    """
-    Taste profile distributions.
-    """
     taste_cols = ["bitter", "sweet", "sour", "salty"]
-
-    taste_scaled = df_clean[taste_cols].mean()
-    taste_scaled = taste_scaled / taste_scaled.sum()
-
-    fig, ax = plt.subplots(figsize=figsize)
-
-    taste_scaled.plot(kind="bar", ax=ax)
-
-    ax.set_title("Relative Contribution of Taste Features")
-    ax.set_ylabel("Proportion")
-    ax.set_xlabel("Taste Feature")
-    ax.tick_params(axis="x", rotation=45)
-
-    fig.tight_layout()
-
-    _save_or_show(fig, save_path, show, dpi)
-
-    return fig, ax
-
-
-def flavor_profile_comparison(
-    save_path='plots/flavor_profile_comparison.png',
-    show=False,
-    figsize=(8, 5),
-    dpi=300
-):
-    """
-    Flavor profile comparison.
-    """
     flavor_cols = ["fruits", "hoppy", "spices", "malty"]
 
-    fig, ax = plt.subplots(figsize=figsize)
+    taste_means = df_clean[taste_cols].mean().sort_values(ascending=False)
+    flavor_means = df_clean[flavor_cols].mean().sort_values(ascending=False)
 
-    df_clean[flavor_cols].mean().plot(kind="bar", ax=ax)
+    fig, ax = plt.subplots(1, 2, figsize=figsize)
 
-    ax.set_title("Average Flavor Profile")
-    ax.set_ylabel("Average Intensity")
-    ax.set_xlabel("Aroma Feature")
-    ax.tick_params(axis="x", rotation=45)
+    sns.barplot(
+        x=taste_means.index,
+        y=taste_means.values,
+        ax=ax[0],
+        color="seagreen"
+    )
+    ax[0].set_title("Average Taste Profile")
+    ax[0].set_xlabel("Taste Feature")
+    ax[0].set_ylabel("Average Intensity")
+    ax[0].tick_params(axis="x", rotation=45)
+
+    sns.barplot(
+        x=flavor_means.index,
+        y=flavor_means.values,
+        ax=ax[1],
+        color="mediumpurple"
+    )
+    ax[1].set_title("Average Aroma / Flavor Profile")
+    ax[1].set_xlabel("Aroma / Flavor Feature")
+    ax[1].set_ylabel("Average Intensity")
+    ax[1].tick_params(axis="x", rotation=45)
 
     fig.tight_layout()
 
@@ -390,8 +376,7 @@ def dominant_style_by_cluster(
 
 if __name__ == '__main__':
     ibu_and_abv_distribution(show=False)
-    taste_profile_distribution(show=False)
-    flavor_profile_comparison(show=False)
+    taste_and_flavor_profile_comparison()
     correlation_matrix_of_taste_descriptors(show=False)
     rating_distribution_vs_number_of_reviews(show=False)
     selection_of_clustering_basis_by_silhouette_score(show=False)
