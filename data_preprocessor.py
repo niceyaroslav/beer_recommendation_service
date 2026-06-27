@@ -1,6 +1,8 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from config import DATA_SOURCE, S3_KEY_DESCRIPTORS
+from data_loader import load_data
 
 
 class DataPreprocessor:
@@ -26,7 +28,10 @@ class DataPreprocessor:
         self.scaled_df = self.scale_df()
 
     def import_main_dataset(self):
-        df = pd.read_csv(self.main_dataset_path)
+        if DATA_SOURCE == 's3':
+            df = load_data()
+        else:
+            df = pd.read_csv(self.main_dataset_path)
         df.columns = (
             df.columns
             .str.strip()
@@ -57,9 +62,12 @@ class DataPreprocessor:
         return pd.DataFrame(descriptors)
 
     def import_and_process_descriptors(self):
-        mouthfeel = pd.read_excel(self.descriptors_path, sheet_name='Mouthfeel', engine='openpyxl')
-        taste = pd.read_excel(self.descriptors_path, sheet_name='Taste', engine='openpyxl')
-        flavor = pd.read_excel(self.descriptors_path, sheet_name='Flavor And Aroma', engine='openpyxl')
+        if DATA_SOURCE == 's3':
+            mouthfeel, taste, flavor = load_data(S3_KEY_DESCRIPTORS)
+        else:
+            mouthfeel = pd.read_excel(self.descriptors_path, sheet_name='Mouthfeel', engine='openpyxl')
+            taste = pd.read_excel(self.descriptors_path, sheet_name='Taste', engine='openpyxl')
+            flavor = pd.read_excel(self.descriptors_path, sheet_name='Flavor And Aroma', engine='openpyxl')
 
         df_mouthfeel = self.reshape_descriptor_sheet(mouthfeel)
         df_taste = self.reshape_descriptor_sheet(taste)

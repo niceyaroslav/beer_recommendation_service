@@ -8,6 +8,13 @@ from recommender import (
     rank_recommendations,
     text_to_model_input, recommend_similar_beer,
 )
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+
 
 from data_preprocessor import DataPreprocessor
 
